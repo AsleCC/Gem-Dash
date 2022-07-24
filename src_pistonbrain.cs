@@ -15,8 +15,6 @@ public class src_pistonbrain : MonoBehaviour {
     [SerializeField] private Animator piston_down = null;
     [SerializeField] private Animator piston_left = null;
 
-
-
     [Header("Sprites")]
     public Sprite adviseSpr;
     public Sprite blackSpr;
@@ -33,20 +31,34 @@ public class src_pistonbrain : MonoBehaviour {
     public float advice_reaction_time;
    
     [Header("Debug")]
-    public int rng;
+    public int[] rng;
     public bool isStarted;
     public bool isTouched;
     public bool isAdviced;
     public bool isDeployed;
     public int state;
 
+    [Header("Gameplay")]
+    public int bonks;
+    public int[] rngChain;
+    bool isCorrect;
+    bool isChaineable;
+
+
+    [Header("Sound Manager")]
+    public GameObject[] ar_bonkSnd;
+    public int rngAudio;
     void Start() {
+        rng = new int[4];
+        isCorrect = false;
+        isChaineable = false; ;
+        bonks = 0;
         player = GameObject.Find("player");
         state = 0;
         isAdviced = false;
         isDeployed = false;
         isTouched = false;
-        rng = 0;
+        rng[0] = 0;
         pop_timer = 3f;
         advice_reaction_time = 2f;
 
@@ -55,12 +67,21 @@ public class src_pistonbrain : MonoBehaviour {
         spriteRenderAdviseDown = ar_pistons[2].GetComponent<SpriteRenderer>();
         spriteRenderAdviseLeft = ar_pistons[3].GetComponent<SpriteRenderer>();
     }
-
     void Update() {
-       
+
         isStarted = player.GetComponent<src_gemchara>().isStarted;
 
-        isTouched = ar_pistons[rng].GetComponent<src_pistonreset>().isTouched;
+        //Posibilidad de concatenación
+        //if(!isChaineable) {
+            
+            isTouched = ar_pistons[rng[0]].GetComponent<src_pistonreset>().isTouched;
+       /* }
+        else if(isChaineable) {
+            while(!isCorrect) {
+
+            }
+            //rngChain = Random.Range(0, ar_pistons.Length);
+        } */
 
         //Esperar
         if (isStarted && state == 0) {
@@ -91,54 +112,78 @@ public class src_pistonbrain : MonoBehaviour {
 
     }
     void Advice() {
-        rng = Random.Range(0, ar_pistons.Length);
-        if (rng == 0) {
-            spriteRenderAdviseUp.sprite = adviseSpr;
+        if(!isChaineable) {
+            rng[0] = Random.Range(0, ar_pistons.Length);
+            if (rng[0] == 0)
+            {
+                spriteRenderAdviseUp.sprite = adviseSpr;
+            }
+            else if (rng[0] == 1)
+            {
+                spriteRenderAdviseRight.sprite = adviseSpr;
+            }
+            else if (rng[0] == 2)
+            {
+                spriteRenderAdviseDown.sprite = adviseSpr;
+            }
+            else if (rng[0] == 3)
+            {
+                spriteRenderAdviseLeft.sprite = adviseSpr;
+            }
         }
-        else if (rng == 1) {
-            spriteRenderAdviseRight.sprite = adviseSpr;
+        else if(isChaineable) {
+
         }
-        else if (rng == 2) {
-            spriteRenderAdviseDown.sprite = adviseSpr;
-        }
-        else if (rng == 3) {
-            spriteRenderAdviseLeft.sprite = adviseSpr;
-        }
+        
         Debug.Log("Adavised");
     }
     void Deployed() {
-        if (rng == 0) {
+        if (rng[0] == 0) {
             spriteRenderAdviseUp.sprite = blackSpr;
             piston_up.Play("piston_up_push", 0, 0.0f);
         }
-        else if (rng == 1) {
+        else if (rng[0] == 1) {
             spriteRenderAdviseRight.sprite = blackSpr;
             piston_right.Play("piston_right_push", 0, 0.0f);
         }
-        else if (rng == 2) {
+        else if (rng[0] == 2) {
             spriteRenderAdviseDown.sprite = blackSpr;
             piston_down.Play("piston_down_push",0,0.0f);
         }
-        else if (rng == 3) {
+        else if (rng[0] == 3) {
             spriteRenderAdviseLeft.sprite = blackSpr;
             piston_left.Play("piston_left_push", 0, 0.0f);
         }
         Debug.Log("Deployed!");
     }
     void Reset() {
-       
+        //Plays Audio
+        rngAudio = Random.Range(0, ar_bonkSnd.Length);
+        ar_bonkSnd[rngAudio].GetComponent<AudioSource>().Play();  
         timer = 0;
         advice_timer = 0;
+        //Play animations
         piston_up.Play("piston_up_idle", 0, 0.0f);
         piston_right.Play("piston_right_idle", 0, 0.0f);
         piston_down.Play("piston_down_idle", 0, 0.0f);
         piston_left.Play("piston_left_idle", 0, 0.0f);
-
-        /*pop_timer -= 0.1f;
-        advice_timer -= 0.1f; */
+        //Increase bonk
+        bonks++;
+        //Checks difficulty
+        Difficulty();
 
         isAdviced = false;
         isDeployed = false;
         Debug.Log("Reseted!");
+    }
+
+    void Difficulty() {
+        pop_timer = 1f;
+        if (pop_timer == 1f && advice_reaction_time >= 1.1f) {
+            advice_reaction_time -= 0.2f;
+        }
+        if (bonks > 15) {
+            isChaineable = true;
+        }
     }
 }
