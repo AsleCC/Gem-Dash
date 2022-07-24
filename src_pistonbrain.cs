@@ -10,7 +10,12 @@ public class src_pistonbrain : MonoBehaviour {
     public SpriteRenderer spriteRenderAdviseLeft;
 
     [Header("Animation settings")]
+    [SerializeField] private Animator piston_up = null;
+    [SerializeField] private Animator piston_right = null;
     [SerializeField] private Animator piston_down = null;
+    [SerializeField] private Animator piston_left = null;
+
+
 
     [Header("Sprites")]
     public Sprite adviseSpr;
@@ -41,7 +46,7 @@ public class src_pistonbrain : MonoBehaviour {
         isAdviced = false;
         isDeployed = false;
         isTouched = false;
-
+        rng = 0;
         pop_timer = 3f;
         advice_reaction_time = 2f;
 
@@ -52,9 +57,10 @@ public class src_pistonbrain : MonoBehaviour {
     }
 
     void Update() {
+       
         isStarted = player.GetComponent<src_gemchara>().isStarted;
 
-        isTouched = ar_pistons[2].GetComponent<src_pistonreset>().isTouched;
+        isTouched = ar_pistons[rng].GetComponent<src_pistonreset>().isTouched;
 
         //Esperar
         if (isStarted && state == 0) {
@@ -63,7 +69,6 @@ public class src_pistonbrain : MonoBehaviour {
         }
         //Avisa
         if(state == 1 && !isAdviced) {
-            Debug.Log("Avisa");
             Advice();
             state = 2;
             isAdviced = true;
@@ -77,7 +82,6 @@ public class src_pistonbrain : MonoBehaviour {
         if(state == 3 && !isDeployed){
             Deployed();
             isDeployed = true;
-           
         }
         //Reset
         if(state == 3 && isTouched) {
@@ -86,10 +90,8 @@ public class src_pistonbrain : MonoBehaviour {
         }
 
     }
-    void Advice()
-    {
-        //rng = Random.Range(0, ar_pistons.Length);
-        rng = 2;
+    void Advice() {
+        rng = Random.Range(0, ar_pistons.Length);
         if (rng == 0) {
             spriteRenderAdviseUp.sprite = adviseSpr;
         }
@@ -102,35 +104,41 @@ public class src_pistonbrain : MonoBehaviour {
         else if (rng == 3) {
             spriteRenderAdviseLeft.sprite = adviseSpr;
         }
+        Debug.Log("Adavised");
     }
     void Deployed() {
-       
-        Debug.Log("Deployed!");
         if (rng == 0) {
-            
+            spriteRenderAdviseUp.sprite = blackSpr;
+            piston_up.Play("piston_up_push", 0, 0.0f);
         }
         else if (rng == 1) {
-            
+            spriteRenderAdviseRight.sprite = blackSpr;
+            piston_right.Play("piston_right_push", 0, 0.0f);
         }
         else if (rng == 2) {
             spriteRenderAdviseDown.sprite = blackSpr;
             piston_down.Play("piston_down_push",0,0.0f);
-           
         }
         else if (rng == 3) {
-           
+            spriteRenderAdviseLeft.sprite = blackSpr;
+            piston_left.Play("piston_left_push", 0, 0.0f);
         }
+        Debug.Log("Deployed!");
     }
     void Reset() {
+       
         timer = 0;
         advice_timer = 0;
+        piston_up.Play("piston_up_idle", 0, 0.0f);
+        piston_right.Play("piston_right_idle", 0, 0.0f);
         piston_down.Play("piston_down_idle", 0, 0.0f);
-        Debug.Log(isTouched);
+        piston_left.Play("piston_left_idle", 0, 0.0f);
 
         /*pop_timer -= 0.1f;
         advice_timer -= 0.1f; */
 
         isAdviced = false;
         isDeployed = false;
+        Debug.Log("Reseted!");
     }
 }

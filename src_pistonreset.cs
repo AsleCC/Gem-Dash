@@ -4,12 +4,26 @@ using UnityEngine;
 
 public class src_pistonreset : MonoBehaviour {
     public bool isTouched;
+    bool isReseted;
     private void OnTriggerEnter2D(Collider2D collision) {
-        Debug.Log("Collided");
-        isTouched = true;
+        if(collision.tag == "Borders" && !isReseted) {
+            Debug.Log("Touched!");
+            isReseted = true;
+        }
+        
     }
     void Update() {
-        isTouched = false;
+        if (isReseted) {
+            isTouched = true;
+        }
+        if(!isReseted) {
+            isTouched = false;
+        }
+        isReseted = false;
     }
+    private void Start() {
+        isReseted = false;
+    }
+
 }
 
