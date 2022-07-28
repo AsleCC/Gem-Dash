@@ -37,20 +37,24 @@ public class src_pistonbrain : MonoBehaviour {
     public bool isAdviced;
     public bool isDeployed;
     public int state;
+    public int tripletChance;
+    public int chance;
 
     [Header("Gameplay")]
     public int bonks;
     public int[] rngChain;
-    bool isCorrect;
     bool isChaineable;
+    int fase;
 
 
     [Header("Sound Manager")]
     public GameObject[] ar_bonkSnd;
     public int rngAudio;
+
     void Start() {
+        tripletChance = 10;
+        fase = 0;
         rng = new int[4];
-        isCorrect = false;
         isChaineable = false; ;
         bonks = 0;
         player = GameObject.Find("player");
@@ -59,6 +63,9 @@ public class src_pistonbrain : MonoBehaviour {
         isDeployed = false;
         isTouched = false;
         rng[0] = 0;
+        rng[1] = 0;
+        rng[2] = 0;
+        rng[3] = 0;
         pop_timer = 3f;
         advice_reaction_time = 2f;
 
@@ -72,16 +79,7 @@ public class src_pistonbrain : MonoBehaviour {
         isStarted = player.GetComponent<src_gemchara>().isStarted;
 
         //Posibilidad de concatenación
-        //if(!isChaineable) {
-            
-            isTouched = ar_pistons[rng[0]].GetComponent<src_pistonreset>().isTouched;
-       /* }
-        else if(isChaineable) {
-            while(!isCorrect) {
-
-            }
-            //rngChain = Random.Range(0, ar_pistons.Length);
-        } */
+        isTouched = ar_pistons[rng[0]].GetComponent<src_pistonreset>().isTouched;
 
         //Esperar
         if (isStarted && state == 0) {
@@ -111,8 +109,9 @@ public class src_pistonbrain : MonoBehaviour {
         }
 
     }
-    void Advice() {
-        if(!isChaineable) {
+    void Advice()
+    {
+        if (!isChaineable) {
             rng[0] = Random.Range(0, ar_pistons.Length);
             if (rng[0] == 0)
             {
@@ -131,29 +130,211 @@ public class src_pistonbrain : MonoBehaviour {
                 spriteRenderAdviseLeft.sprite = adviseSpr;
             }
         }
-        else if(isChaineable) {
+        if (isChaineable) {
+            Compare();  
+        }
+
+        Debug.Log("Advised");
+    }
+    private void Compare() {
+        RNGMaker();
+
+        if(fase == 0) {
+            //Posibilidades con arriba
+            //Arriba + Derecha
+            if ((rng[0] == 0 && rng[1] == 1) || (rng[0] == 1 && rng[1] == 0))
+            {
+                spriteRenderAdviseUp.sprite = adviseSpr;
+                spriteRenderAdviseRight.sprite = adviseSpr;
+            }
+            //Arriba + Abajo
+            else if ((rng[0] == 0 && rng[1] == 2) || (rng[0] == 2 && rng[1] == 0))
+            {
+                spriteRenderAdviseDown.sprite = adviseSpr;
+                spriteRenderAdviseUp.sprite = adviseSpr;
+            }
+            //Arriba + Izquierda
+            else if ((rng[0] == 0 && rng[1] == 3) || (rng[0] == 3 && rng[1] == 0))
+            {
+                spriteRenderAdviseLeft.sprite = adviseSpr;
+                spriteRenderAdviseUp.sprite = adviseSpr;
+            }
+            //Posibilidades con derecha
+            //Derecha + Abajo
+            else if ((rng[0] == 1 && rng[1] == 2) || (rng[0] == 2 && rng[1] == 1))
+            {
+                spriteRenderAdviseDown.sprite = adviseSpr;
+                spriteRenderAdviseRight.sprite = adviseSpr;
+            }
+            //Derecha + Izquierda
+            else if ((rng[0] == 1 && rng[1] == 3) || (rng[0] == 3 && rng[1] == 1))
+            {
+                spriteRenderAdviseRight.sprite = adviseSpr;
+                spriteRenderAdviseLeft.sprite = adviseSpr;
+            }
+            //Posibilidad con Abajo
+            //Abajo + Izquierda
+            else if ((rng[0] == 2 && rng[1] == 3) || (rng[0] == 3 && rng[1] == 2))
+            {
+                spriteRenderAdviseDown.sprite = adviseSpr;
+                spriteRenderAdviseLeft.sprite = adviseSpr;
+            }
+        }else if (fase == 1) {
+            //Arriba + Derecha + Abajo
+            if ((rng[0] == 0 && rng[1] == 1 && rng[2] == 2) || (rng[0] == 0 && rng[1] == 2 && rng[2] == 1) || (rng[0] == 1 && rng[1] == 0 && rng[2] == 2) || (rng[0] == 1 && rng[1] == 2 && rng[2] == 0) || (rng[0] == 2 && rng[1] == 0 && rng[2] == 1) || (rng[0] == 2 && rng[1] == 1 && rng[2] == 0)) {
+                spriteRenderAdviseUp.sprite = adviseSpr;
+                spriteRenderAdviseRight.sprite = adviseSpr;
+                spriteRenderAdviseDown.sprite = adviseSpr;
+            }
+            //Arriba + Abajo + Izquierda
+            else if ((rng[0] == 0 && rng[1] == 2 && rng[2] == 3) || (rng[0] == 0 && rng[1] == 3 && rng[2] == 2) || (rng[0] == 2 && rng[1] == 0 && rng[2] == 3) || (rng[0] == 2 && rng[1] == 3 && rng[2] == 0) || (rng[0] == 3 && rng[1] == 0 && rng[2] == 2) || (rng[0] == 3 && rng[1] == 2 && rng[2] == 0))
+            {
+                spriteRenderAdviseLeft.sprite = adviseSpr;
+                spriteRenderAdviseUp.sprite = adviseSpr;
+                spriteRenderAdviseDown.sprite = adviseSpr;
+            }
+            //Arriba + Derecha + Izquierda
+            else if ((rng[0] == 0 && rng[1] == 1 && rng[2] == 3) || (rng[0] == 0 && rng[1] == 3 && rng[2] == 1) || (rng[0] == 1 && rng[1] == 0 && rng[2] == 3) || (rng[0] == 1 && rng[1] == 3 && rng[2] == 0) || (rng[0] == 3 && rng[1] == 0 && rng[2] == 1) || (rng[0] == 3 && rng[1] == 1 && rng[2] == 0))
+            {
+                spriteRenderAdviseLeft.sprite = adviseSpr;
+                spriteRenderAdviseRight.sprite = adviseSpr;
+                spriteRenderAdviseUp.sprite = adviseSpr;
+            }
+            //Derecha + Abajo + Izquierda
+            else if ((rng[0] == 2 && rng[1] == 1 && rng[2] == 3) || (rng[0] == 2 && rng[1] == 3 && rng[2] == 1) || (rng[0] == 1 && rng[1] == 2 && rng[2] == 3) || (rng[0] == 1 && rng[1] == 3 && rng[2] == 2) || (rng[0] == 3 && rng[1] == 2 && rng[2] == 1) || (rng[0] == 3 && rng[1] == 1 && rng[2] == 2))
+            {
+                spriteRenderAdviseLeft.sprite = adviseSpr;
+                spriteRenderAdviseRight.sprite = adviseSpr;
+                spriteRenderAdviseDown.sprite = adviseSpr;
+            }
 
         }
-        
-        Debug.Log("Adavised");
+
+
+
     }
+
     void Deployed() {
-        if (rng[0] == 0) {
-            spriteRenderAdviseUp.sprite = blackSpr;
-            piston_up.Play("piston_up_push", 0, 0.0f);
+        if(!isChaineable) {
+            if (rng[0] == 0)
+            {
+                spriteRenderAdviseUp.sprite = blackSpr;
+                piston_up.Play("piston_up_push", 0, 0.0f);
+            }
+            else if (rng[0] == 1)
+            {
+                spriteRenderAdviseRight.sprite = blackSpr;
+                piston_right.Play("piston_right_push", 0, 0.0f);
+            }
+            else if (rng[0] == 2)
+            {
+                spriteRenderAdviseDown.sprite = blackSpr;
+                piston_down.Play("piston_down_push", 0, 0.0f);
+            }
+            else if (rng[0] == 3)
+            {
+                spriteRenderAdviseLeft.sprite = blackSpr;
+                piston_left.Play("piston_left_push", 0, 0.0f);
+            }
         }
-        else if (rng[0] == 1) {
-            spriteRenderAdviseRight.sprite = blackSpr;
-            piston_right.Play("piston_right_push", 0, 0.0f);
+        else if (isChaineable) {
+
+            if (fase == 0) {
+                //Arriba + Derecha
+                if ((rng[0] == 0 && rng[1] == 1) || (rng[0] == 1 && rng[1] == 0))
+                {
+                    spriteRenderAdviseUp.sprite = blackSpr;
+                    spriteRenderAdviseRight.sprite = blackSpr;
+                    piston_up.Play("piston_up_push", 0, 0.0f);
+                    piston_right.Play("piston_right_push", 0, 0.0f);
+                }
+                //Arriba + Abajo
+                else if ((rng[0] == 0 && rng[1] == 2) || (rng[0] == 2 && rng[1] == 0))
+                {
+                    spriteRenderAdviseDown.sprite = blackSpr;
+                    spriteRenderAdviseUp.sprite = blackSpr;
+                    piston_up.Play("piston_up_push", 0, 0.0f);
+                    piston_down.Play("piston_down_push", 0, 0.0f);
+                }
+                //Arriba + Izquierda
+                else if ((rng[0] == 0 && rng[1] == 3) || (rng[0] == 3 && rng[1] == 0))
+                {
+                    spriteRenderAdviseLeft.sprite = blackSpr;
+                    spriteRenderAdviseUp.sprite = blackSpr;
+                    piston_up.Play("piston_up_push", 0, 0.0f);
+                    piston_left.Play("piston_left_push", 0, 0.0f);
+                }
+                //Posibilidades con derecha
+                //Derecha + Abajo
+                else if ((rng[0] == 1 && rng[1] == 2) || (rng[0] == 2 && rng[1] == 1))
+                {
+                    spriteRenderAdviseDown.sprite = blackSpr;
+                    spriteRenderAdviseRight.sprite = blackSpr;
+                    piston_right.Play("piston_right_push", 0, 0.0f);
+                    piston_down.Play("piston_down_push", 0, 0.0f);
+                }
+                //Derecha + Izquierda
+                else if ((rng[0] == 1 && rng[1] == 3) || (rng[0] == 3 && rng[1] == 1))
+                {
+                    spriteRenderAdviseRight.sprite = blackSpr;
+                    spriteRenderAdviseLeft.sprite = blackSpr;
+                    piston_right.Play("piston_right_push", 0, 0.0f);
+                    piston_left.Play("piston_left_push", 0, 0.0f);
+                }
+                //Posibilidad con Abajo
+                //Abajo + Izquierda
+                else if ((rng[0] == 2 && rng[1] == 3) || (rng[0] == 3 && rng[1] == 2))
+                {
+                    spriteRenderAdviseDown.sprite = blackSpr;
+                    spriteRenderAdviseLeft.sprite = blackSpr;
+                    piston_down.Play("piston_down_push", 0, 0.0f);
+                    piston_left.Play("piston_left_push", 0, 0.0f);
+                }
+            }
+            else if (fase == 1) {
+                //Arriba + Derecha + Abajo
+                if ((rng[0] == 0 && rng[1] == 1 && rng[2] == 2) || (rng[0] == 0 && rng[1] == 2 && rng[2] == 1) || (rng[0] == 1 && rng[1] == 0 && rng[2] == 2) || (rng[0] == 1 && rng[1] == 2 && rng[2] == 0) || (rng[0] == 2 && rng[1] == 0 && rng[2] == 1) || (rng[0] == 2 && rng[1] == 1 && rng[2] == 0)) {
+                    spriteRenderAdviseUp.sprite = blackSpr;
+                    spriteRenderAdviseRight.sprite = blackSpr;
+                    spriteRenderAdviseDown.sprite = blackSpr;
+                    piston_up.Play("piston_up_push",0,0.0f);
+                    piston_right.Play("piston_right_push", 0, 0.0f);
+                    piston_down.Play("piston_down_push",0, 0.0f);
+                }
+                //Arriba + Abajo + Izquierda
+                else if ((rng[0] == 0 && rng[1] == 2 && rng[2] == 3) || (rng[0] == 0 && rng[1] == 3 && rng[2] == 2) || (rng[0] == 2 && rng[1] == 0 && rng[2] == 3) || (rng[0] == 2 && rng[1] == 3 && rng[2] == 0) || (rng[0] == 3 && rng[1] == 0 && rng[2] == 2) || (rng[0] == 3 && rng[1] == 2 && rng[2] == 0))
+                {
+                    spriteRenderAdviseLeft.sprite = blackSpr;
+                    spriteRenderAdviseUp.sprite = blackSpr;
+                    spriteRenderAdviseDown.sprite = blackSpr;
+                    piston_up.Play("piston_up_push", 0, 0.0f);
+                    piston_down.Play("piston_down_push", 0, 0.0f);
+                    piston_left.Play("piston_left_push", 0, 0.0f);
+                }
+                //Arriba + Derecha + Izquierda
+                else if ((rng[0] == 0 && rng[1] == 1 && rng[2] == 3) || (rng[0] == 0 && rng[1] == 3 && rng[2] == 1) || (rng[0] == 1 && rng[1] == 0 && rng[2] == 3) || (rng[0] == 1 && rng[1] == 3 && rng[2] == 0) || (rng[0] == 3 && rng[1] == 0 && rng[2] == 1) || (rng[0] == 3 && rng[1] == 1 && rng[2] == 0))
+                {
+                    spriteRenderAdviseLeft.sprite = blackSpr;
+                    spriteRenderAdviseRight.sprite = blackSpr;
+                    spriteRenderAdviseUp.sprite = blackSpr;
+                    piston_up.Play("piston_up_push", 0, 0.0f);
+                    piston_right.Play("piston_right_push", 0, 0.0f);
+                    piston_left.Play("piston_left_push", 0, 0.0f);
+                }
+                //Derecha + Abajo + Izquierda
+                else if ((rng[0] == 2 && rng[1] == 1 && rng[2] == 3) || (rng[0] == 2 && rng[1] == 3 && rng[2] == 1) || (rng[0] == 1 && rng[1] == 2 && rng[2] == 3) || (rng[0] == 1 && rng[1] == 3 && rng[2] == 2) || (rng[0] == 3 && rng[1] == 2 && rng[2] == 1) || (rng[0] == 3 && rng[1] == 1 && rng[2] == 2))
+                {
+                    spriteRenderAdviseLeft.sprite = blackSpr;
+                    spriteRenderAdviseRight.sprite = blackSpr;
+                    spriteRenderAdviseDown.sprite = blackSpr;
+                    piston_down.Play("piston_down_push", 0, 0.0f);
+                    piston_right.Play("piston_right_push", 0, 0.0f);
+                    piston_left.Play("piston_left_push", 0, 0.0f);
+                }
+            }
+           
         }
-        else if (rng[0] == 2) {
-            spriteRenderAdviseDown.sprite = blackSpr;
-            piston_down.Play("piston_down_push",0,0.0f);
-        }
-        else if (rng[0] == 3) {
-            spriteRenderAdviseLeft.sprite = blackSpr;
-            piston_left.Play("piston_left_push", 0, 0.0f);
-        }
+       
         Debug.Log("Deployed!");
     }
     void Reset() {
@@ -179,11 +360,28 @@ public class src_pistonbrain : MonoBehaviour {
 
     void Difficulty() {
         pop_timer = 1f;
-        if (pop_timer == 1f && advice_reaction_time >= 1.1f) {
-            advice_reaction_time -= 0.2f;
+        isChaineable = true;
+    }
+    void RNGMaker() {
+        chance = Random.Range(0, 101);
+        if (tripletChance <= chance) {
+            fase = 0;
+            do {
+                rng[0] = Random.Range(0, ar_pistons.Length);
+                rng[1] = Random.Range(0, ar_pistons.Length);
+            } while (rng[0] == rng[1] || rng[1] == rng[0]);
+            chance += 5;
         }
-        if (bonks > 15) {
-            isChaineable = true;
+        else {
+            fase = 1;
+            do
+            {
+                rng[0] = Random.Range(0, ar_pistons.Length);
+                rng[1] = Random.Range(0, ar_pistons.Length);
+                rng[2] = Random.Range(0, ar_pistons.Length);
+            } while (rng[0] == rng[1] || rng[0] == rng[2] || rng[1] == rng[0] || rng[1] == rng[2] || rng[2] == rng[1] || rng[2] == rng[0]);
+            chance -= 2;
         }
+        
     }
 }
